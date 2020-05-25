@@ -88,6 +88,7 @@ def recurse(directory, csvwriter, validate_json = False):
                         fullpath = os.path.join(directory, json_file_path)
                         if not os.path.isfile(fullpath):
                             print('WARNING: JSON file does not exist: ' + fullpath)
+                            json_file_path = 'missing'
 
                     """Get participant ID, visit_label, modality, and scan_type from
                     path. Add JSON and NIFTI prefixes manually.
