@@ -103,7 +103,7 @@ def recurse(directory, csvwriter, validate_json = False):
                     row.append(json_file_path)
                     csvwriter.writerow(row)
 
-                    # Print a spinner and a runnign count of files analyzed for every 100
+                    # Print a spinner and a running count of files analyzed for every 100
                     global count
                     count += 1
                     if count % 100 == 0:
@@ -124,10 +124,12 @@ def recurse(directory, csvwriter, validate_json = False):
             print(e)
 
 def print_spinner():
+    """Displays a loading spinner."""
     global spinner
     sys.stdout.write(next(spinner))   # write the next character
     sys.stdout.flush()                # flush stdout buffer (actual character display)
     sys.stdout.write('\b')            # erase the last written char
+
 
 # Parse arguments and do basic validation on inputs.
 parser = ArgumentParser()
@@ -141,10 +143,14 @@ if args.directory == None:
     parser.print_help()
     quit()
 
+# A running count of the number of files processed.
 global count
 count = 0
+# The length of the directory parameter. This will be stripped from files
+# during processing.
 global prefix_length
 prefix_length = len(args.directory)
+
 """If a user does not include a forward slash, an extra character needs 
 to be stripped from the file path later."""
 if not args.directory.endswith('/'):
@@ -157,6 +163,8 @@ if not args.directory.endswith('/'):
 with open('results.csv', 'w', newline='') as csvfile:
     print('Beginning analysis of directory {}...'.format(args.directory))
     csvwriter = csv.writer(csvfile)
+    # write column headers
+    csvwriter.writerow(
+            ['participant_id','visit_label','modality','scan_type','nifti_file_path','json_file_path']
+            )
     recurse(args.directory, csvwriter, args.checkjson)
-
-
