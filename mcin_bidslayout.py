@@ -41,7 +41,7 @@ def parse_pathinfo(bids_file):
     return [participant_id, visit_label, modality, scan_type]
 
 
-def recurse(directory, csvwriter, validate_json = False):
+def recurse(directory, csvwriter):
     """We're using scandir here because it explicitly returns an iterator, allowing
     for lazy evaluation of the list. This will help us avoid memory problems.
     """
@@ -78,17 +78,10 @@ def recurse(directory, csvwriter, validate_json = False):
                         image_file_path = entry.name
 
                     json_file_path = stem + '.json'
-                    """Optionally validate whether the JSON file actually exists for
-                    this imaging file. This is not done by default because this script
-                    is expected to be run on massive, read-only datasets and so it's
-                    useful to shave off time where possible. The datasets can probably
-                    be trusted.
-                    """
-                    if validate_json:
-                        fullpath = os.path.join(directory, json_file_path)
-                        if not os.path.isfile(fullpath):
-                            print('WARNING: JSON file does not exist: ' + fullpath)
-                            json_file_path = 'missing'
+                    fullpath = os.path.join(directory, json_file_path)
+                    if not os.path.isfile(fullpath):
+                        print('WARNING: JSON file does not exist: ' + fullpath)
+                        json_file_path = 'missing'
 
                     """Get participant ID, visit_label, modality, and scan_type from
                     path. Add JSON and NIFTI prefixes manually.
@@ -116,7 +109,7 @@ def recurse(directory, csvwriter, validate_json = False):
                     print_spinner()
 
                 if entry.is_dir():
-                    recurse(entry.path, csvwriter, validate_json)
+                    recurse(entry.path, csvwriter)
         except PermissionError as e:
             """This occurred during testing a squashfs instance that was improperly configured.
             Raising this exception will help with identifying configuration problems.
@@ -135,8 +128,6 @@ def print_spinner():
 parser = ArgumentParser()
 parser.add_argument("-d", "--directory", dest="directory",
                     help="BIDS directory to scan. Must be in valid BIDS format.")
-parser.add_argument("-j", "--check-json", dest="checkjson", action='store_true',
-                    help="Validates that JSON sidecar files exist. False by default.")
 args = parser.parse_args()
 
 if args.directory == None:
@@ -167,4 +158,4 @@ with open('results.csv', 'w', newline='') as csvfile:
     csvwriter.writerow(
             ['participant_id','visit_label','modality','scan_type','nifti_file_path','json_file_path']
             )
-    recurse(args.directory, csvwriter, args.checkjson)
+    recurse(args.directory, csvwriter)

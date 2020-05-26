@@ -1,8 +1,12 @@
-# Background
+# Usage
+
+```python
+python3 mcin_bidslayout.py -d <bids_directory>
+```
+
+# Purpose/Background
 
 _This is a companion script for use with [LORIS-MRI](https://github.com/aces/Loris-MRI)._
-
-When analyzing
 
 LORIS-MRI contains a processing pipeline written in Python to assist with the analysis
 and import of data from BIDS datasets to the [LORIS software](https://github.com/aces/Loris). These tools depend on a
@@ -11,6 +15,8 @@ This library uses Python's `os.walk()` function to read a BIDS folder. For most
 cases this works well; however, problems can occur with very large datasets. `os.walk()`
 calls `os.stat()` on each file which increases runtime dramatically.
 
+## Issue
+
 In the context of a project at [MCIN](https://github.com/aces/), we had a use case where we needed to remotely
 mount a large dataset which would be read into a LORIS database. Due to the size of this
 dataset, `pybids` was not able to complete the analysis of the directory and [the
@@ -18,7 +24,7 @@ maintainters reported](https://github.com/bids-standard/pybids/issues/609) that 
 (This was exacerbated on our side as the pipeline was running over files mounted
 remotely via `sshfs` which increased processing time.)
 
-# Solution
+## Solution
 
 Our pipeline failed when calling BIDSLayout from `pybids`. Rather than read all the
 folders into memory at run-time, we have written this script to read through a
@@ -28,7 +34,7 @@ This CSV file will be analyzed by LORIS-MRI's Python scripts and read into a for
 matching the key-value pairs used in `pybids`'s BIDSLayout.
 
 This should address the issue by:
-	
+
 
 * Eliminating all the file read operations during the processing pipeline. Instead, it will only read from the CSV file.
 	
@@ -36,4 +42,12 @@ This should address the issue by:
 
 ## Layout of the CSV file
 
-[todo]
+The CSV file must contain the following headers:
+* participant_id
+* visit_label
+* modality
+* scan_type
+* nifti_file_path
+* json_file_path
+
+As you can see, JSON sidecar files are stored in the same row as their corresponding (NIFTI) image file, rather than storing one file per row.
