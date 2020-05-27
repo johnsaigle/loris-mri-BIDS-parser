@@ -69,18 +69,15 @@ def recurse(directory, csvwriter):
 
                     extension = p.suffixes[0]
 
-                    # Strip arcive info
-
                     if extension == '.json':
                         continue
 
                     elif extension == '.nii':
                         image_file_path = entry.name
 
-                    json_file_path = stem + '.json'
-                    fullpath = os.path.join(directory, json_file_path)
-                    if not os.path.isfile(fullpath):
-                        print('WARNING: JSON file does not exist: ' + fullpath)
+                    json_file_path = os.path.join(directory, stem + '.json')
+                    if not os.path.isfile(json_file_path):
+                        print('WARNING: JSON file does not exist: ' + json_file_path + "\n")
                         json_file_path = 'missing'
 
                     """Get participant ID, visit_label, modality, and scan_type from
@@ -90,9 +87,9 @@ def recurse(directory, csvwriter):
                     """
                     global prefix_length
 
-                    # Parse path info and strip the directory from the front of the path.
+                    # Parse path info
                     row = parse_pathinfo(entry.path[prefix_length:])
-                    row.append(image_file_path)
+                    row.append(entry.path)
                     row.append(json_file_path)
                     csvwriter.writerow(row)
 
